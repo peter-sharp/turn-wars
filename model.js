@@ -1,57 +1,13 @@
-importScripts('//unpkg.com/redux@4.0.4/dist/redux.js')
+importScripts('/node_modules/redux/dist/redux.js')
+importScripts('/board/index.js')
 
 const initialState = {
-    board: {
-        layers: [
-            {
-                type: 'tiles',
-                tiles: [
-                    0,0,0,0,0,0,0,0,0,0,
-                    0,1,0,0,0,0,0,0,0,0,
-                    0,0,0,0,1,0,0,0,0,0,
-                    0,0,0,0,0,0,0,0,0,0,
-                    0,0,0,0,0,0,0,0,0,0,
-                    0,0,0,0,0,0,0,0,0,0,
-                    0,0,0,0,0,0,0,0,0,0,
-                    0,0,0,0,0,0,0,0,0,0,
-                    0,0,0,0,0,0,0,0,0,0,
-                    0,0,0,0,0,0,0,0,0,0,
-                ]
-            },
-            {
-                type: 'objects',
-                objects: []
-            }
-        ],
-        columns: 10,
-        rows: 10,
-    },
+    board: board.initialState,
     actors: [],
     currentActor: 0
 }
 
-function updateLayers(state = initialState.board.layers, action) {
-    const TILES = 0
-    const OBJECTS = 1
-    switch (action.type) {
-        case 'ADD_ACTOR_TO_BOARD':
-            return [
-                state[TILES],
-                Object.assign({}, state[OBJECTS], { objects: [...state[OBJECTS].objects, action.data]})
-            ]
-        default:
-            return state
-    }
-}
 
-function board(state = initialState.board, action) {
-
-    return {
-        layers: updateLayers(state.layers, action),
-        columns: state.columns,
-        rows: state.rows
-    }
-}
 
 function updateActors(state = [], action) {
     switch(action.type) {
@@ -73,7 +29,7 @@ function updateCurrentActor(state = 0, action, actors) {
 function game(state = initialState, action) {
     const actors = updateActors(state.actors, action)
     return {
-        board: board(state.board, action),
+        board: board.reduce(state.board, action),
         actors,
         currentActor: updateCurrentActor(state.currentActor, action, actors)
     }

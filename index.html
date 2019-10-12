@@ -3,9 +3,14 @@
     <head>
         <meta charset="utf-8"/>
         <title>Turn Wars</title>
-        <script type="module" src="/controller.js"></script>
+        <script type="module" src="/game.js"></script>
     </head>
     <body>
-    <canvas></canvas>
+    <div id="root">
+        <header>
+            <button v-on:click="startGame">New Game</button>
+        </header>
+        <canvas ref="canvas"></canvas>
+    </div>
     </body>
 </html>
