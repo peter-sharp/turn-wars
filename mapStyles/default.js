@@ -53,9 +53,24 @@ function defaultStyle({ tileSize, context }) {
         }
     }
 
+    function infantry({ row, column }) {
+        const width = tileSize / 8
+        const height = tileSize / 2
+        const x = tileSize * column + (tileSize / 2) - width / 2 * Math.random()
+        const y = tileSize * row + (tileSize / 2) - height / 2 * Math.random()
+
+        context.fillStyle = 'rgb(0, 50, 20)'
+        context.fillRect(x, y , width, height)
+        context.fillStyle = 'rgba(0, 50, 20, 0.3)'
+        context.fillRect(x, y, width, height / 8)
+    }
+
 
     return {
-        tiles: [renderGrass, renderWater]
+        tiles: [renderGrass, renderWater],
+        objects: {
+            infantry
+        }
     }
 }
 

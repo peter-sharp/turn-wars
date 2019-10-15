@@ -19,26 +19,12 @@ function ui({ tileSize, emit }) {
         methods: {
             
             startGame() {
-                console.log('starting game')
                 emit({
-                    type: 'REGENERATE_TILES',
-                    layer: 0
-                })
-
-                emit({
-                    type: 'CREATE_ACTOR',
+                    type: 'START_GAME',
                     data: {
-                        type: 'infantry',
-                        owner: 0
-                    }
-                })
-
-                emit({
-                    type: 'CREATE_ACTOR',
-                    data: {
-                        type: 'infantry',
-                        owner: 1
-                    }
+                        startingUnits: ['infantry'],
+                        players: 2
+                    },
                 })
             }
         }
@@ -51,29 +37,33 @@ function ui({ tileSize, emit }) {
     let mapStyle = defaultMapStyle({ tileSize, context })
 
     function render(state) {
+        console.info(state)
         canvas.width = state.board.columns * tileSize;
         canvas.height = state.board.rows * tileSize;
-        state.board.layers.forEach(renderLayer.bind(null, state.board));
-        console.log(state)
+        state.board.layers.forEach(renderLayer.bind(null, state));
     }
     
-    function renderLayer(board, layer) {
+    function renderLayer(state, layer) {
         switch (layer.type) {
             case 'tiles':
-                renderTiles(board, layer.tiles)
+                renderTiles(state, layer.tiles)
                 break;
         
             case 'objects':
-                renderObjects(board, layer.objects)
+                renderObjects(state, layer.objects)
                 break;
         }
     }
 
-    function renderObjects(board, objects) {
-        // TODO
+    function renderObjects({ actors }, objects) {
+        objects.forEach(({ index, coords }) => {
+            const actor = actors[index]
+            mapStyle.objects[actor.type](coords)
+        })
     }
 
-    function renderTiles ({ rows, columns }, tiles) {
+    function renderTiles ({ board }, tiles) {
+        const { rows, columns } = board
         for (let column = 0; column < columns; column++) {
             for (let row = 0; row < rows; row++) {
                 let tile = getTile({ tiles, columns, rows }, { row, column })
