@@ -80,7 +80,7 @@ function game(state = initialState, action) {
 }
 
 function findNearestTerrainType(layer, type, coord) {
-    if(type == board.getTile(layer, coord))
+    if(type == board.getTile(layer, coord)) {}
 }
 
 const store = Redux.createStore(game)
