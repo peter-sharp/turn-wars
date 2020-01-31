@@ -1,5 +1,5 @@
-importScripts('/node_modules/redux/dist/redux.js')
-importScripts('/board/index.js')
+import { createStore } from "redux";
+import board from './board/index.js'
 
 const initialState = {
     board: board.initialState,
@@ -53,10 +53,7 @@ function game(state = initialState, action) {
                     data: {
                         layer: 1,
                         index,
-                        coords: {
-                            column: Math.floor((state.board.columns / players.length) * owner + index),
-                            row:    Math.floor((state.board.rows    / players.length) * owner + index)
-                        }
+                        coords: findStartingPosition(state.board, players.length, owner, index)
                     }
                 })
             }, newBoard)
@@ -79,11 +76,30 @@ function game(state = initialState, action) {
     
 }
 
-function findNearestTerrainType(layer, type, coord) {
-    if(type == board.getTile(layer, coord)) {}
+function findStartingPosition({ columns, rows}, numPlayers, owner, index) {
+    const coord = {
+        column: Math.floor((columns / numPlayers) * owner + index),
+        row: Math.floor((rows / numPlayers) * owner + index)
+    };
+    const layerId = 0
+    return findNearestTerrainType(board, layerId, 1, coord)
 }
 
-const store = Redux.createStore(game)
+function findNearestTerrainType(board, layerId, type, coord) {
+    const layer = board.layers[layerId]
+    let hit = coord;
+    if(type != board.getTile(layer, coord)) {
+        const newCoord = getRandomAjacentTile(board, layer, coord);
+        hit = findNearestTerrainType(board, layerId, type, newCoord);
+    }
+    return hit;
+}
+
+function getRandomAjacentTile(board, layer, coord) {
+    board.getAdjacentTiles({})
+}
+
+const store = createStore(game);
 
 onmessage = function handleMessage(ev) {
     store.dispatch(ev.data)
