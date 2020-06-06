@@ -102,6 +102,7 @@ function findNearestTerrainType(board, layerId, type, coord) {
       tries < MAX_TRIES
     ) {
       hit = getRandomAjacentCoord(board, { layerId, ...hit });
+      if(!hit) hit = coord;
       tries += 1;
     }
     return hit;
