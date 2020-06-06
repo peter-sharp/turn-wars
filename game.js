@@ -1,4 +1,4 @@
-import ui from '/ui.js'
+import ui from '/ui.js';
 
 const game = new Worker('/model.js', { name: 'model' })
 

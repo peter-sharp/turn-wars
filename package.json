@@ -4,6 +4,7 @@
   "description": "",
   "main": "controller.js",
   "scripts": {
+    "start": "pnpm run dev",
     "postinstall": "npx @pika/web",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "pnpx run-p dev:*",

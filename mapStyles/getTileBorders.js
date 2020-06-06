@@ -11,7 +11,7 @@ import {
     toPairs,
     partial
 } from '/web_modules/ramda.js'
-import board from './board/index.js'
+import board from '/board/index.js'
 const notEqual = complement(equals)
 
 const getPairValue = compose(prop(1))

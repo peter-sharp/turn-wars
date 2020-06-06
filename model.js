@@ -1,8 +1,9 @@
 import { createStore } from "redux";
-import board from './board/index.js'
+import Board from './board/index.js'
+import { randomPick } from '/random.js'
 
 const initialState = {
-    board: board.initialState,
+    board: Board.initialState,
     actors: [],
     currentActor: 0,
     players: []
@@ -31,7 +32,7 @@ function game(state = initialState, action) {
     let actors;
     switch (action.type) {
         case 'START_GAME':
-            
+            state = { ...initialState };
             const players = range(action.data.players).map((i) => ({ name: `Player ${i + 1}`}))
 
             actors = players.reduce((actors, player, i) => {
@@ -40,7 +41,7 @@ function game(state = initialState, action) {
                 )
             }, [])
 
-            let newBoard = board.reduce(state.board, {
+            let newBoard = Board.reduce(state.board, {
                 type: 'REGENERATE_TILES',
                 data: {
                     layer: 0
@@ -48,14 +49,19 @@ function game(state = initialState, action) {
             })
 
             newBoard = actors.reduce((newBoard, { owner }, index) => {
-                return board.reduce(newBoard, {
-                    type: 'ADD_ACTOR_TO_BOARD',
-                    data: {
-                        layer: 1,
-                        index,
-                        coords: findStartingPosition(state.board, players.length, owner, index)
-                    }
-                })
+                return Board.reduce(newBoard, {
+                  type: "ADD_ACTOR_TO_BOARD",
+                  data: {
+                    layer: 1,
+                    index,
+                    coords: findStartingPosition(
+                      newBoard,
+                      players.length,
+                      owner,
+                      index
+                    ),
+                  },
+                });
             }, newBoard)
 
             return Object.assign({}, state, {
@@ -67,7 +73,7 @@ function game(state = initialState, action) {
         default:
             actors = updateActors(state.actors, action)
             return {
-                board: board.reduce(state.board, action),
+                board: Board.reduce(state.board, action),
                 actors,
                 currentActor: updateCurrentActor(state.currentActor, action, actors)
             }
@@ -76,27 +82,34 @@ function game(state = initialState, action) {
     
 }
 
-function findStartingPosition({ columns, rows}, numPlayers, owner, index) {
-    const coord = {
+function findStartingPosition(board, numPlayers, owner, index) {
+    const { columns, rows} = board
+    const coord = Board.Coord({
         column: Math.floor((columns / numPlayers) * owner + index),
         row: Math.floor((rows / numPlayers) * owner + index)
-    };
+    });
     const layerId = 0
-    return findNearestTerrainType(board, layerId, 1, coord)
+    const grass = 0
+    return findNearestTerrainType(board, layerId, grass, coord);
 }
 
 function findNearestTerrainType(board, layerId, type, coord) {
-    const layer = board.layers[layerId]
     let hit = coord;
-    if(type != board.getTile(layer, coord)) {
-        const newCoord = getRandomAjacentTile(board, layer, coord);
-        hit = findNearestTerrainType(board, layerId, type, newCoord);
+    let tries = 0;
+    const MAX_TRIES = 4000
+    while (
+      type != Board.getTile(board, { layerId, ...hit }) &&
+      tries < MAX_TRIES
+    ) {
+      hit = getRandomAjacentCoord(board, { layerId, ...hit });
+      tries += 1;
     }
     return hit;
 }
 
-function getRandomAjacentTile(board, layer, coord) {
-    board.getAdjacentTiles({})
+function getRandomAjacentCoord(board,  coord) {
+    const ajacentCoords = Board.getAdjacentCoords(board, coord);
+    return randomPick(Object.values(ajacentCoords));
 }
 
 const store = createStore(game);
@@ -105,7 +118,10 @@ onmessage = function handleMessage(ev) {
     store.dispatch(ev.data)
 }
 
-const unsubscribe = store.subscribe(() => postMessage(store.getState()))
+const unsubscribe = store.subscribe(() => {
+    const state = store.getState();
+    postMessage(state);
+})
 
 function range(length) {
     return Object.keys(Array.from({ length })).map(toInt)
